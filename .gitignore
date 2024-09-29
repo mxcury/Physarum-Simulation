@@ -1,0 +1,70 @@
+# Visual Studio
+.vscode/
+*.code-workspace
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.sln.metaproj*
+*.VC.db
+*.VC.opendb
+*.VC.VC.opendb
+*.VC.VC.opendb-wal
+*.VC.VC.db
+
+# Build folders
+[Bb]uild/
+[Bb]in/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# Windows specific files
+*.obj
+*.pch
+*.pdb
+*.idb
+*.ipdb
+*.ilk
+*.aps
+*.ncb
+*.sdf
+*.opensdf
+*.sln
+
+# OpenGL (if third-party libraries like GLFW, GLEW, etc. are used, depending on how they are set up)
+libs/
+*.dll
+*.lib
+*.so
+*.dylib
+
+# C++ specific
+*.o
+*.out
+*.a
+*.lo
+*.la
+*.lai
+*.lbi
+*.gch
+*.d
+*.tlog
+*.log
+
+# Ignore compiled assets
+*.exe
+*.app
+*.ipa
+*.dsym
+*.dmg
+*.dll
+*.lib
+*.so
+*.dylib
+
+# Other
+*.log
+*.cache
+*.tmp
