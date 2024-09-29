@@ -8,11 +8,12 @@ float random() {
     return distribution(random_generator);
 }
 
-
 std::tuple<int, int, int> generateRandomColour() {
-    return std::make_tuple(static_cast<int>(random() * 255),
+    return std::make_tuple(
         static_cast<int>(random() * 255),
-        static_cast<int>(random() * 255));
+        static_cast<int>(random() * 255),
+        static_cast<int>(random() * 255)
+    );
 }
 
 std::tuple<int, int, int> HIGH_PHEROMONE_COLOUR = RANDOM_COLOUR ? generateRandomColour() : DEFAULT_HIGH_PHEROMONE_COLOUR;
@@ -27,4 +28,3 @@ float radiansToValue(float radians) {
     value = (value < 0) ? value + 1.0f : (value >= 1.0f ? value - 1.0f : value);
     return value;
 }
-

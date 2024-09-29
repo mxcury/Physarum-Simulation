@@ -1,26 +1,9 @@
 #include <omp.h>
 #include "Environment.h"
+#include <iostream>
 
 Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pair(0.0f, -1))
 {
-    if (RANDOM_COLOUR) {
-        HIGH_PHEROMONE_COLOUR = std::make_tuple(
-            static_cast<int>(random() * 255.0f),
-            static_cast<int>(random() * 255.0f),
-            static_cast<int>(random() * 255.0f)
-        );
-
-        LOW_PHEROMONE_COLOUR = std::make_tuple(
-            static_cast<int>(random() * 255.0f),
-            static_cast<int>(random() * 255.0f),
-            static_cast<int>(random() * 255.0f)
-        );
-    }
-    else {
-        HIGH_PHEROMONE_COLOUR = DEFAULT_HIGH_PHEROMONE_COLOUR;
-        LOW_PHEROMONE_COLOUR = DEFAULT_LOW_PHEROMONE_COLOUR;
-    }
-
     for (int agentID = 0; agentID < SPAWN_COUNT; agentID++) {
         float x = 0.0f;
         float y = 0.0f;
@@ -88,7 +71,7 @@ Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pa
 }
 
 void Environment::update() {
-#pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < agents.size(); ++i) {
         if (agents[i].isAlive()) agents[i].update();
     }
@@ -127,17 +110,21 @@ void Environment::display(SDL_Renderer* renderer) {
                 float interpG = lowG + (highG - lowG) * pheromone;
                 float interpB = lowB + (highB - lowB) * pheromone;
 
+                Uint8 alpha = static_cast<Uint8>(pheromone * 255);
+
                 SDL_SetRenderDrawColor(renderer,
                     static_cast<Uint8>(interpR),
                     static_cast<Uint8>(interpG),
                     static_cast<Uint8>(interpB),
-                    static_cast<Uint8>(pheromone * 255.0f));
+                    alpha);
 
                 SDL_RenderDrawPoint(renderer, x, y);
             }
         }
     }
 }
+
+
 
 
 void Environment::diffusePheromones(float x, float y) {

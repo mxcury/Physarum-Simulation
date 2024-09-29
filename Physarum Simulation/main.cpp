@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     }
 
     // Create an SDL renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
     {
         std::cerr << "Failed to create renderer: " << SDL_GetError() << std::endl;
@@ -44,11 +44,10 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Set the draw color to black (background) with full opacity (255 alpha)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    Environment env; // Create an instance of your Environment class
+    Environment env;
 
     bool running = true;
     SDL_Event event;
@@ -56,7 +55,6 @@ int main(int argc, char* argv[])
     // Main loop
     while (running)
     {
-        // Handle events
         while (SDL_PollEvent(&event) != 0)
         {
             if (event.type == SDL_QUIT)
@@ -65,17 +63,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        // Update environment
         env.update();
 
-        // Clear the screen (black background with full opacity)
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // Display environment (implement drawing in the Environment class)
         env.display(renderer);
 
-        // Present the backbuffer (show what has been drawn)
         SDL_RenderPresent(renderer);
     }
 

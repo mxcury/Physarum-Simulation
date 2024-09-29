@@ -155,6 +155,8 @@ void Agent::update() {
     }
 
     if (iterationsWithoutInteraction >= LIFESPAN) {
-        alive = false;
+        if (random() < SURVIVAL_CHANCE) {
+            alive = false;
+        }
     }
 }
