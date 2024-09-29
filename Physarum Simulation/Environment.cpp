@@ -112,30 +112,28 @@ void Environment::update() {
 
 
 
-void Environment::display() {
+void Environment::display(SDL_Renderer* renderer) {
     const auto& [highR, highG, highB] = HIGH_PHEROMONE_COLOUR;
     const auto& [lowR, lowG, lowB] = LOW_PHEROMONE_COLOUR;
 
-    for (float y = 0; y < WINDOW_HEIGHT; ++y) {
-        for (float x = 0; x < WINDOW_WIDTH; ++x) {
-            int index = static_cast<int>(y) * WINDOW_WIDTH + static_cast<int>(x);
+    for (int y = 0; y < WINDOW_HEIGHT; ++y) {
+        for (int x = 0; x < WINDOW_WIDTH; ++x) {
+            int index = y * WINDOW_WIDTH + x;
 
             float pheromone = trailMap[index].first;
 
             if (pheromone > 0.0f) {
-
                 float interpR = lowR + (highR - lowR) * pheromone;
                 float interpG = lowG + (highG - lowG) * pheromone;
                 float interpB = lowB + (highB - lowB) * pheromone;
 
-                glColor4f(interpR / 255.0f, interpG / 255.0f, interpB / 255.0f, pheromone);
+                SDL_SetRenderDrawColor(renderer,
+                    static_cast<Uint8>(interpR),
+                    static_cast<Uint8>(interpG),
+                    static_cast<Uint8>(interpB),
+                    static_cast<Uint8>(pheromone * 255.0f));
 
-                glBegin(GL_QUADS);
-                glVertex2f(static_cast<GLfloat>(x), static_cast<GLfloat>(y));
-                glVertex2f(static_cast<GLfloat>(x + 1), static_cast<GLfloat>(y));
-                glVertex2f(static_cast<GLfloat>(x + 1), static_cast<GLfloat>(y + 1));
-                glVertex2f(static_cast<GLfloat>(x), static_cast<GLfloat>(y + 1));
-                glEnd();
+                SDL_RenderDrawPoint(renderer, x, y);
             }
         }
     }

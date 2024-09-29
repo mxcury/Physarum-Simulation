@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <GLFW/glfw3.h>
 #include "GlobalConstants.h"
 #include "Agent.h"
 
@@ -9,7 +8,7 @@ class Environment
 public:
     Environment();
 
-    void display();
+    void display(SDL_Renderer* renderer);
     void update();
 
 private:

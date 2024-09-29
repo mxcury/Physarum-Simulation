@@ -4,6 +4,7 @@
 #include <random>
 #include <numbers>
 #include <tuple>
+#include <SDL.h>
 #include "SpawnSettings.h"
 
 const int FRAMES_PER_SECOND = 60;
@@ -24,7 +25,7 @@ const std::tuple<int, int, int> DEFAULT_LOW_PHEROMONE_COLOUR = { 0, 0, 255 };
 extern std::tuple<int, int, int> HIGH_PHEROMONE_COLOUR;
 extern std::tuple<int, int, int> LOW_PHEROMONE_COLOUR;
 
-const bool RANDOM_COLOUR = true;
+const bool RANDOM_COLOUR = false;
 
 // Spawn Settings
 const SpawnPosition SPAWN_POSITION = SpawnPosition::CIRCLE;
@@ -49,7 +50,7 @@ const float PHEROMONE_THRESHOLD = 0.005f;
 
 // Environment Settings
 const float DECAY_RATE = 0.03f;
-const BoundaryCollision BOUNDARY_COLLISION = BoundaryCollision::CONTAINED;
+const BoundaryCollision BOUNDARY_COLLISION = BoundaryCollision::WRAP;
 
 
 // Helper functions

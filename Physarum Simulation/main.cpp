@@ -1,57 +1,88 @@
 #include <iostream>
-#include <GLFW/glfw3.h>
 #include "Environment.h"
 #include "GlobalConstants.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
-    GLFWwindow* window;
-
-    /* Initialize the library */
-    if (!glfwInit())
+    // Initialize SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return -1;
+    }
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Physarum Simulation", NULL, NULL);
+    // Create an SDL window
+    SDL_Window* window = SDL_CreateWindow("Physarum Simulation",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        WINDOW_WIDTH, WINDOW_HEIGHT,
+        SDL_WINDOW_SHOWN);
     if (!window)
     {
-        glfwTerminate();
+        std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
+        SDL_Quit();
         return -1;
     }
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    Environment env;
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
+    // Create an SDL renderer
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer)
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        env.update();
-
-        env.display();
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        std::cerr << "Failed to create renderer: " << SDL_GetError() << std::endl;
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return -1;
     }
 
-    glfwTerminate();
+    // Enable alpha blending mode
+    if (SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND) != 0)
+    {
+        std::cerr << "Failed to enable alpha blending: " << SDL_GetError() << std::endl;
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return -1;
+    }
+
+    // Set the draw color to black (background) with full opacity (255 alpha)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    Environment env; // Create an instance of your Environment class
+
+    bool running = true;
+    SDL_Event event;
+
+    // Main loop
+    while (running)
+    {
+        // Handle events
+        while (SDL_PollEvent(&event) != 0)
+        {
+            if (event.type == SDL_QUIT)
+            {
+                running = false;
+            }
+        }
+
+        // Update environment
+        env.update();
+
+        // Clear the screen (black background with full opacity)
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // Display environment (implement drawing in the Environment class)
+        env.display(renderer);
+
+        // Present the backbuffer (show what has been drawn)
+        SDL_RenderPresent(renderer);
+    }
+
+    // Clean up
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
     return 0;
 }
