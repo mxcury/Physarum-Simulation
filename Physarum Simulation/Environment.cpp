@@ -1,3 +1,4 @@
+#include <omp.h>
 #include "Environment.h"
 
 Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pair(0.0f, -1))
@@ -87,20 +88,34 @@ Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pa
 }
 
 void Environment::update() {
-    for (Agent& agent : agents) {
-        if (!agent.isAlive()) continue;
-        agent.update();
+#pragma omp parallel for schedule(dynamic)
+    for (int i = 0; i < agents.size(); ++i) {
+        if (agents[i].isAlive()) agents[i].update();
     }
 
+
+    #pragma omp parallel for collapse(2) schedule(static)
     for (float y = 0; y < WINDOW_HEIGHT; ++y) {
         for (float x = 0; x < WINDOW_WIDTH; ++x) {
             diffusePheromones(x, y);
+        }
+    }
+
+    #pragma omp parallel for collapse(2) schedule(static)
+    for (float y = 0; y < WINDOW_HEIGHT; ++y) {
+        for (float x = 0; x < WINDOW_WIDTH; ++x) {
             decayPheromones(x, y);
         }
     }
 }
 
+
+
+
 void Environment::display() {
+    const auto& [highR, highG, highB] = HIGH_PHEROMONE_COLOUR;
+    const auto& [lowR, lowG, lowB] = LOW_PHEROMONE_COLOUR;
+
     for (float y = 0; y < WINDOW_HEIGHT; ++y) {
         for (float x = 0; x < WINDOW_WIDTH; ++x) {
             int index = static_cast<int>(y) * WINDOW_WIDTH + static_cast<int>(x);
@@ -108,8 +123,6 @@ void Environment::display() {
             float pheromone = trailMap[index].first;
 
             if (pheromone > 0.0f) {
-                const auto& [highR, highG, highB] = HIGH_PHEROMONE_COLOUR;
-                const auto& [lowR, lowG, lowB] = LOW_PHEROMONE_COLOUR;
 
                 float interpR = lowR + (highR - lowR) * pheromone;
                 float interpG = lowG + (highG - lowG) * pheromone;
@@ -130,9 +143,9 @@ void Environment::display() {
 
 
 void Environment::diffusePheromones(float x, float y) {
-    if (x < 0 || x >= WINDOW_WIDTH || y < 0 || y >= WINDOW_HEIGHT) {
-        return;
-    }
+    int index = static_cast<int>(y) * WINDOW_WIDTH + static_cast<int>(x);
+
+    if (index < 0 || index >= trailMap.size()) return;
 
     float sum = 0.0f;
     int count = 0;
@@ -144,37 +157,30 @@ void Environment::diffusePheromones(float x, float y) {
 
             if (neighborX >= 0 && neighborX < WINDOW_WIDTH && neighborY >= 0 && neighborY < WINDOW_HEIGHT) {
                 int neighborIndex = neighborY * WINDOW_WIDTH + neighborX;
-
-                if (neighborIndex >= 0 && neighborIndex < static_cast<int>(trailMap.size())) {
-                    sum += trailMap[neighborIndex].first;
-                    count++;
-                }
+                sum += trailMap[neighborIndex].first;
+                count++;
             }
         }
     }
 
-    int index = static_cast<int>(y) * WINDOW_WIDTH + static_cast<int>(x);
-
-    if (index >= 0 && index < static_cast<int>(trailMap.size()) && count > 0) {
+    if (count > 0) {
         trailMap[index].first = sum / count;
     }
 }
 
-
 void Environment::decayPheromones(float x, float y) {
-    if (x < 0 || x >= WINDOW_WIDTH || y < 0 || y >= WINDOW_HEIGHT) {
-        return;
-    }
-
     int index = static_cast<int>(y) * WINDOW_WIDTH + static_cast<int>(x);
 
-    if (index >= 0 && index < static_cast<int>(trailMap.size())) {
-        trailMap[index].first *= (1.0f - DECAY_RATE);
-        trailMap[index].first = std::max(trailMap[index].first, 0.0f);
+    if (index < 0 || index >= trailMap.size()) return;
 
-        if (trailMap[index].first == 0.0f) {
-            trailMap[index].second = -1;
-        }
+    trailMap[index].first *= (1.0f - DECAY_RATE);
+    trailMap[index].first = std::max(trailMap[index].first, 0.0f);
+
+    if (trailMap[index].first < PHEROMONE_THRESHOLD) {
+        trailMap[index].second = -1;
     }
 }
+
+
+
 

@@ -14,4 +14,9 @@ enum class InitialHeading {
     EDGE
 };
 
+enum class BoundaryCollision {
+    WRAP,
+    CONTAINED
+};
+
 #endif
