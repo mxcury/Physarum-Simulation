@@ -11,19 +11,20 @@ public:
     float getY() const { return y; }
     float getHeading() const { return heading; }
     bool isAlive() const { return alive; }
+    bool getReproduce() const { return reproduce; }
+
+    void setReproduce(bool newValue) { reproduce = newValue; }
 
 private:
     int agentID;
     float x, y;
     float heading, vx, vy, speed;
-    bool alive;
-    int iterationsWithoutInteraction;
+    bool alive, reproduce;
+    int iteractions_death, iteractions_life;
 
     std::pair<float, float> frontSensorPosition = { 0.0f, 0.0f };
     std::pair<float, float> leftSensorPosition = { 0.0f, 0.0f };
     std::pair<float, float> rightSensorPosition = { 0.0f, 0.0f };
 
-    std::vector<std::pair<float, int>>& trailMap;
-
-    float getPheromoneValue(std::pair<float, float> sensorPosition, bool& interaction);
+    std::vector<std::pair<float, int>>* trailMap;
 };

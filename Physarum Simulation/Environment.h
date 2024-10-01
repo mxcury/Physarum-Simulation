@@ -15,6 +15,9 @@ private:
     std::vector<Agent> agents;
     std::vector<std::pair<float, int>> trailMap;
 
-    void diffusePheromones(float x, float y);
-    void decayPheromones(float x, float y);
+    void diffuse(int x, int y);
+    void decay(int x, int y);
+
+    int numberOfAgents;
+
 };
