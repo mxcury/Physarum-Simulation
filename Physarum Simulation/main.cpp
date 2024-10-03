@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include <SDL.h>
 #include <chrono>
 #include "Environment.h"

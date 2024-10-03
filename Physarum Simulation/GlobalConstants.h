@@ -15,7 +15,7 @@ const float PI = std::numbers::pi_v<float>;
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 
-const unsigned int RANDOM_SEED = 1;
+const unsigned int RANDOM_SEED = 010203;
 
 // Colour Settings
 const std::tuple<int, int, int> DEFAULT_HIGH_PHEROMONE_COLOUR = { 255, 0, 0 };
@@ -28,27 +28,27 @@ const bool RANDOM_COLOUR =  false;
 
 // Spawn Settings
 const SpawnPosition SPAWN_POSITION = SpawnPosition::CIRCLE;
-const InitialHeading INITIAL_HEADING = InitialHeading::CENTRED;
-const int SPAWN_RADIUS = 300;
+const InitialHeading INITIAL_HEADING = InitialHeading::EDGE;
+const int SPAWN_RADIUS = 150;
 
-const int SPAWN_COUNT = 8000;
+const int SPAWN_COUNT = 10000;
 
 // Agent Settings
 const float ROTATION_ANGLE = 0.125f;
 
 const float SENSOR_ANGLE = 0.125f;
-const int SENSOR_DISTANCE = 40;
+const int SENSOR_DISTANCE = 20;
 
 const float RANDOM_MOVEMENT_CHANCE = 0.5f;
 const float DIRECTION_BIAS = 0.5f;
 
-const float PHEROMONE_SPREAD = 1.0f;
+const float PHEROMONE_SPREAD = 0.5f;
 
 const int LIFESPAN = 100;
-const int REPRODUCTION_VALUE = 1000;
+const int REPRODUCTION_VALUE = 500;
 const float PHEROMONE_THRESHOLD = 0.005f;
 
-const float REPRODUCE_CHANCE = 0.001f;
+const float REPRODUCE_CHANCE = 0.025f;
 const float SURVIVAL_CHANCE = 0.1f;
 
 // Environment Settings

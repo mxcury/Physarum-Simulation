@@ -1,4 +1,3 @@
-#include <omp.h>
 #include "Environment.h"
 
 Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pair(0.0f, -1)), numberOfAgents(SPAWN_COUNT)
@@ -104,7 +103,8 @@ void Environment::update() {
     std::vector<Agent> newAgents;
     std::vector<int> agentsToRemove;
 
-#pragma omp parallel for
+    std::cout << agents.size() << std::endl;
+
     for (int i = 0; i < agents.size(); ++i) {
         if (agents[i].isAlive()) {
             agents[i].update();
@@ -112,18 +112,12 @@ void Environment::update() {
             if (agents[i].getReproduce()) {
                 float oppositeHeading = fmod(agents[i].getHeading() + 0.5f, 1.0f);
                 int newAgentID;
-#pragma omp atomic capture
                 newAgentID = ++numberOfAgents;
-
-#pragma omp critical
-                {
-                    newAgents.push_back(Agent(newAgentID, agents[i].getX(), agents[i].getY(), oppositeHeading, trailMap));
-                }
+                newAgents.push_back(Agent(newAgentID, agents[i].getX(), agents[i].getY(), oppositeHeading, trailMap));
                 agents[i].setReproduce(false);
             }
         }
         else {
-#pragma omp critical
             {
                 agentsToRemove.push_back(i); 
             }
@@ -137,7 +131,6 @@ void Environment::update() {
 
     agents.insert(agents.end(), newAgents.begin(), newAgents.end());
 
-#pragma omp parallel for collapse(2) schedule(static) nowait
     for (int y = 0; y < WINDOW_HEIGHT; ++y) {
         for (int x = 0; x < WINDOW_WIDTH; ++x) {
             diffuse(x, y);
@@ -150,7 +143,7 @@ void Environment::update() {
 
 }
 
-void Environment::diffuse(int x, int y) {
+inline void Environment::diffuse(int x, int y) {
     int index = y * WINDOW_WIDTH + x;
 
     if (index < 0 || index >= static_cast<int>(trailMap.size())) return;
