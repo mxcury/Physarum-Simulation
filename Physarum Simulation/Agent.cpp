@@ -1,8 +1,7 @@
 #include "Agent.h"
 
 Agent::Agent(int id, float xCoord, float yCoord, float heading, std::vector<std::pair<float, int>>& trailMap):
-    agentID(id), x(xCoord), y(yCoord), heading(heading), trailMap(&trailMap),
-    speed(1.0f), alive(true), reproduce(false), iteractions_death(0), iteractions_life(0)
+    agentID(id), x(xCoord), y(yCoord), heading(heading), trailMap(&trailMap), alive(true), reproduce(false), iteractions_death(0), iteractions_life(0)
 {
 	vx = cos(valueToRadians(heading));
 	vy = sin(valueToRadians(heading));
@@ -18,23 +17,6 @@ void Agent::update() {
 
     x += vx;
     y += vy;
-
-    int intSpread = static_cast<int>(PHEROMONE_SPREAD);
-
-    for (int i = -intSpread; i <= intSpread; ++i) {
-        for (int j = -intSpread; j <= intSpread; ++j) {
-            float distance = sqrt(static_cast<float>(i * i + j * j));
-            if (distance > PHEROMONE_SPREAD) continue;
-
-            int indexX = static_cast<int>(x + i);
-            int indexY = static_cast<int>(y + j);
-
-            if (indexX >= 0 && indexX < WINDOW_WIDTH && indexY >= 0 && indexY < WINDOW_HEIGHT) {
-                int index = indexY * WINDOW_WIDTH + indexX;
-                trailMap->at(index) = std::make_pair(1.0f, agentID);
-            }
-        }
-    }
 
     float rightSensorAngle = headingRadians + valueToRadians(SENSOR_ANGLE);
     float leftSensorAngle = headingRadians - valueToRadians(SENSOR_ANGLE);
@@ -87,6 +69,7 @@ void Agent::update() {
     float leftSensorActivation = 0.0f;
 
     bool interaction = false;
+    bool foodDetected = false;
 
     if (trailMap && !trailMap->empty()) {
         auto getPheromoneValue = [&](std::pair<float, float> sensorPosition) -> float {
@@ -100,11 +83,15 @@ void Agent::update() {
                     float pheromoneValue = trailMap->at(index).first;
                     int detectedMoldId = trailMap->at(index).second;
                     if (pheromoneValue > PHEROMONE_THRESHOLD) {
-                        if (agentID != detectedMoldId && detectedMoldId != -1) {
+                        if (detectedMoldId == -2) {
+                            foodDetected = true;
+                            return pheromoneValue;
+                        }
+                        else if (agentID != detectedMoldId && detectedMoldId != -1) {
                             interaction = true;
                             return pheromoneValue;
                         }
-                        else {
+                        else if (detectedMoldId == agentID || detectedMoldId == -1) {
                             return -pheromoneValue;
                         }
                     }
@@ -118,22 +105,38 @@ void Agent::update() {
         leftSensorActivation = getPheromoneValue(leftSensorPosition);
     }
 
-
-    if (frontSensorActivation > leftSensorActivation && frontSensorActivation > rightSensorActivation) {
-        heading += 0.0f;
-    }
-    else if (frontSensorActivation < leftSensorActivation && frontSensorActivation < rightSensorActivation) {
-        heading += (random() < RANDOM_MOVEMENT_CHANCE) ?
-            ((random() < DIRECTION_BIAS) ? -ROTATION_ANGLE : ROTATION_ANGLE) :
-            0.0f;
+    if (foodDetected) {
+        if (frontSensorActivation >= leftSensorActivation && frontSensorActivation >= rightSensorActivation) {
+            heading += 0.0f;
+        }
+        else if (leftSensorActivation > rightSensorActivation) {
+            heading -= ROTATION_ANGLE;
+        }
+        else {
+            heading += ROTATION_ANGLE;
+        }
     }
     else {
-        heading += (leftSensorActivation < rightSensorActivation) ? ROTATION_ANGLE : -ROTATION_ANGLE;
+        if (frontSensorActivation > leftSensorActivation && frontSensorActivation > rightSensorActivation) {
+            heading += 0.0f;
+        }
+        else if (frontSensorActivation < leftSensorActivation && frontSensorActivation < rightSensorActivation) {
+            heading += (random() < RANDOM_MOVEMENT_CHANCE) ?
+                ((random() < DIRECTION_BIAS) ? -ROTATION_ANGLE : ROTATION_ANGLE) :
+                0.0f;
+        }
+        else {
+            heading += (leftSensorActivation < rightSensorActivation) ? ROTATION_ANGLE : -ROTATION_ANGLE;
+        }
     }
 
-    if (interaction) {
-        iteractions_death = 0;
+
+    if (foodDetected) {
         iteractions_life++;
+        iteractions_death = 0;
+    }
+    else if (interaction) {
+        iteractions_death = 0;
     }
     else {
         iteractions_death++;
@@ -152,4 +155,25 @@ void Agent::update() {
             alive = false;
         }
     }
+
+    int intSpread = static_cast<int>(PHEROMONE_SPREAD);
+
+    for (int i = -intSpread; i <= intSpread; ++i) {
+        for (int j = -intSpread; j <= intSpread; ++j) {
+            float distance = sqrt(static_cast<float>(i * i + j * j));
+            if (distance > PHEROMONE_SPREAD) continue;
+
+            int indexX = static_cast<int>(x + i);
+            int indexY = static_cast<int>(y + j);
+
+            if (indexX >= 0 && indexX < WINDOW_WIDTH && indexY >= 0 && indexY < WINDOW_HEIGHT) {
+                int index = indexY * WINDOW_WIDTH + indexX;
+                if (trailMap->at(index).second == -2) {
+                    trailMap->at(index) = std::make_pair(1.0f, -2);
+                }
+                trailMap->at(index) = std::make_pair(1.0f, agentID);
+            }
+        }
+    }
 }
+

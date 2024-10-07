@@ -66,6 +66,10 @@ Environment::Environment() : trailMap(WINDOW_WIDTH * WINDOW_HEIGHT, std::make_pa
         }
         agents.push_back(Agent(agentID, x, y, heading, trailMap));
     }
+    food.push_back(Food(800, 400, 5, false, trailMap));
+    food.push_back(Food(800, 600, 5, false, trailMap));
+    food.push_back(Food(450, 700, 5, false, trailMap));
+    food.push_back(Food(450, 200, 5, false, trailMap));
 
 }
 
@@ -81,9 +85,11 @@ void Environment::display(SDL_Renderer* renderer) {
 
             if (pheromone <= 0.0f) continue;
 
-            float interpR = lowR + (highR - lowR) * pheromone;
-            float interpG = lowG + (highG - lowG) * pheromone;
-            float interpB = lowB + (highB - lowB) * pheromone;
+            float interpR, interpG, interpB;
+
+            interpR = lowR + (highR - lowR) * pheromone;
+            interpG = lowG + (highG - lowG) * pheromone;
+            interpB = lowB + (highB - lowB) * pheromone;
 
             Uint8 alpha = static_cast<Uint8>(pheromone * 255);
 
@@ -100,10 +106,13 @@ void Environment::display(SDL_Renderer* renderer) {
 
 
 void Environment::update() {
+
+    for (int i = 0; i < food.size(); i++) {
+        food[i].update();
+    }
+
     std::vector<Agent> newAgents;
     std::vector<int> agentsToRemove;
-
-    std::cout << agents.size() << std::endl;
 
     for (int i = 0; i < agents.size(); ++i) {
         if (agents[i].isAlive()) {
@@ -140,7 +149,6 @@ void Environment::update() {
             }
         }
     }
-
 }
 
 inline void Environment::diffuse(int x, int y) {
@@ -152,6 +160,10 @@ inline void Environment::diffuse(int x, int y) {
     int count = 0;
 
     int radius = KERNAL_SIZE / 2;
+    if (trailMap[index].second == -2) {
+        radius *= 2;
+    }
+
 
     int xStart = std::max(0, x - radius);
     int xEnd = std::min(static_cast<int>(WINDOW_WIDTH - 1), x + radius);
@@ -177,6 +189,8 @@ void Environment::decay(int x, int y) {
     int index = y * WINDOW_WIDTH + x;
 
     if (index < 0 || index >= static_cast<int>(trailMap.size())) return;
+
+    if (trailMap[index].second < 0) return;
 
     trailMap[index].first *= (1.0f - DECAY_RATE);
     trailMap[index].first = std::max(trailMap[index].first, PHEROMONE_THRESHOLD);

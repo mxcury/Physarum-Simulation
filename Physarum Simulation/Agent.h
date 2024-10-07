@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include "GlobalConstants.h"
 
 class Agent {
@@ -12,13 +13,12 @@ public:
     float getHeading() const { return heading; }
     bool isAlive() const { return alive; }
     bool getReproduce() const { return reproduce; }
-
     void setReproduce(bool newValue) { reproduce = newValue; }
 
 private:
     int agentID;
     float x, y;
-    float heading, vx, vy, speed;
+    float heading, vx, vy;
     bool alive, reproduce;
     int iteractions_death, iteractions_life;
 
@@ -27,4 +27,5 @@ private:
     std::pair<float, float> rightSensorPosition = { 0.0f, 0.0f };
 
     std::vector<std::pair<float, int>>* trailMap;
+
 };

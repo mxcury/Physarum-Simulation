@@ -150,12 +150,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Environment.cpp" />
+    <ClCompile Include="Food.cpp" />
     <ClCompile Include="GlobalConstants.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Agent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h" />
+    <ClInclude Include="Food.h" />
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="SpawnSettings.h" />
     <ClInclude Include="Agent.h" />

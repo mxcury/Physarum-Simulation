@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <fstream>      // For file handling
 #include <SDL.h>
 #include <chrono>
 #include "Environment.h"
@@ -48,6 +48,17 @@ int main(int argc, char* argv[]) {
     SDL_RenderClear(renderer);
 
     Environment env;
+
+    // Open CSV file for writing
+    std::ofstream csvFile("agent_data.csv");
+    if (!csvFile.is_open()) {
+        std::cerr << "Failed to open file for writing." << std::endl;
+        return -1;
+    }
+
+    // Write the header to the CSV file
+    csvFile << "Iteration,AgentCount\n";
+
     bool running = true;
     SDL_Event event;
 
@@ -55,6 +66,8 @@ int main(int argc, char* argv[]) {
     auto startTime = std::chrono::high_resolution_clock::now();
 
     // Main loop
+    int extraIterations = 0; // Counter for additional iterations after emptyTrail returns true
+
     while (running) {
         auto frameStart = std::chrono::high_resolution_clock::now();
 
@@ -65,6 +78,23 @@ int main(int argc, char* argv[]) {
         }
 
         env.update();
+
+        // If the trail is empty and the extra iterations counter hasn't been set
+        if (env.emptyTrail() && extraIterations == 0) {
+            extraIterations = 50;  // Start counting down the extra iterations
+        }
+
+        // If we are in the extra iteration phase, decrement the counter
+        if (extraIterations > 0) {
+            extraIterations--;
+            if (extraIterations == 0) {
+                running = false;  // Stop after 50 extra iterations
+            }
+        }
+
+        // Log the current iteration and agent count to the CSV file
+        int agentCount = env.getAgentCount() - SPAWN_COUNT;
+        csvFile << frameCount << "," << agentCount << "\n";
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -80,7 +110,13 @@ int main(int argc, char* argv[]) {
         if (frameDelay > frameTime) {
             SDL_Delay(frameDelay - frameTime);
         }
+
+        frameCount++;  // Increment the iteration count
     }
+
+
+    // Close the CSV file
+    csvFile.close();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
